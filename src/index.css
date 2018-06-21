@@ -1,9 +1,13 @@
 div {
   display: flex;
+  box-sizing: border-box;
 }
 
-p {
-  font-size: 35px;
-  color: white;
+i {
+  font-size: 45px;
   margin: auto;
+}
+
+#highlight {
+  box-shadow: green;
 }
