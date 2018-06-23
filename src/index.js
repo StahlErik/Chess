@@ -3,24 +3,31 @@ import ReactDOM from "react-dom";
 import "./index.css";
 
 class Tile extends React.Component {
-  static defaultProps = { tileColor: "#ffce9e" };
+  static defaultProps = { tileType: "light" };
 
   render() {
+    const { tileType, value, onClick } = this.props;
+
+    let backgroundColor = tileType === "light" ? "#ffce9e" : "#d18b47";
+
+    if (value.availableMove) {
+      backgroundColor = tileType === "light" ? "pink" : "hotpink";
+    }
+
     return (
       <div
-        className={this.props.value.availableMove}
         style={{
-          backgroundColor: this.props.tileColor,
+          backgroundColor,
           width: 70,
           height: 70,
-          borderStyle: this.props.value.clicked
+          borderStyle: value.clicked ? "dashed" : "none"
         }}
-        onClick={this.props.onClick}
+        onClick={onClick}
       >
         <i
-          className={this.props.value.piece}
+          className={value.piece}
           style={{
-            color: this.props.value.color
+            color: value.color
           }}
         />
       </div>
@@ -44,7 +51,7 @@ class Row extends React.Component {
       <div>
         {colArray.map((_, index) => (
           <Tile
-            tileColor={(index % 2) - modifier === 0 ? "#ffce9e" : "#d18b47"}
+            tileType={(index % 2) - modifier === 0 ? "light" : "dark"}
             key={index}
             value={this.props.tiles[this.calcTileNr(this.props.rowInd, index)]}
             onClick={() =>
@@ -64,8 +71,8 @@ class Game extends React.Component {
     tiles: Array(64).fill({
       piece: "",
       color: "",
-      clicked: "none",
-      availableMove: ""
+      clicked: false,
+      availableMove: false
     })
   };
   fillBoard(array, startIndex, color) {
@@ -151,11 +158,15 @@ class Game extends React.Component {
     let tiles = this.state.tiles.slice();
     let j;
     for (j = 0; j < tiles.length; j++) {
-      tiles[j] = { ...this.state.tiles[j], clicked: "none" };
+      tiles[j] = {
+        ...tiles[j],
+        clicked: false,
+        availableMove: false
+      };
     }
     tiles[i] = {
-      ...this.state.tiles[i],
-      clicked: "dashed"
+      ...tiles[i],
+      clicked: true
     };
     if (this.checkPlayerOnTile(i)) {
       console.log("match");
@@ -189,7 +200,7 @@ class Game extends React.Component {
     for (j = 0; j < moves.length; j++) {
       tiles[i + moves[j]] = {
         ...this.state.tiles[i + moves[j]],
-        clicked: "solid"
+        availableMove: true
       };
     }
     return tiles;
@@ -203,7 +214,9 @@ class Game extends React.Component {
     } else if (piece.includes("rook")) {
       let j;
       for (j = 0; j < 7; j++) {
-        moves.push(j + 1);
+        if (i + j + 1 <= 63 && i + j + 1 >= 0) {
+          moves.push(j + 1);
+        }
         moves.push(-j - 1);
         moves.push((j + 1) * 8);
         moves.push((-j - 1) * 8);
