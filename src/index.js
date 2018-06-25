@@ -188,14 +188,9 @@ class Game extends React.Component {
   }
   highlightAvailableMoves(i, tiles) {
     //let pawnMoves = [8, 16];
-    let moves = this.calculatePieceMoves(i, tiles);
-    let modifier = 1;
-    if (this.state.tiles[i].color === "white") {
-      modifier = -1;
-    }
-    moves = moves.map(function(element) {
-      return element * modifier;
-    });
+    let moves = [];
+    moves = this.calculatePieceMoves(i, tiles);
+    console.log("moves: ", moves);
     let j;
     for (j = 0; j < moves.length; j++) {
       tiles[i + moves[j]] = {
@@ -210,19 +205,116 @@ class Game extends React.Component {
     let moves = [];
     let piece = tiles[i].piece;
     if (piece.includes("pawn")) {
-      moves = [8, 16];
+      let startPosRook = [];
+      let modifier = 1;
+      if (tiles[i].color === "white") {
+        startPosRook = [48, 49, 50, 51, 52, 53, 54, 55];
+        modifier = -1;
+      } else {
+        startPosRook = [8, 9, 10, 11, 12, 13, 14, 15];
+      }
+      if (startPosRook.includes(i)) {
+        moves = [8 * modifier, 16 * modifier];
+      } else {
+        moves = [8 * modifier];
+      }
     } else if (piece.includes("rook")) {
       let j;
+      let count;
+      let upMove = true;
+      let downMove = true;
+      let rightMove = true;
+      let leftMove = true;
       for (j = 0; j < 7; j++) {
-        if (i + j + 1 <= 63 && i + j + 1 >= 0) {
+        count = i + j + 1;
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece === "" &&
+          rightMove
+        ) {
           moves.push(j + 1);
+          if (tiles[count].color !== tiles[i].color) {
+            rightMove = false;
+          }
+        } else {
+          rightMove = false;
         }
-        moves.push(-j - 1);
-        moves.push((j + 1) * 8);
-        moves.push((-j - 1) * 8);
+        count = i - j - 1;
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece === "" &&
+          leftMove
+        ) {
+          moves.push(-j - 1);
+          if (tiles[count].color !== tiles[i].color) {
+            rightMove = false;
+          }
+        } else {
+          leftMove = false;
+        }
+        count = i + (j + 1) * 8;
+        if (count <= 63 && count >= 0 && tiles[count].piece === "" && upMove) {
+          moves.push((j + 1) * 8);
+          if (tiles[count].color !== tiles[i].color) {
+            rightMove = false;
+          }
+        } else {
+          upMove = false;
+        }
+        count = i + (-j - 1) * 8;
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece === "" &&
+          downMove
+        ) {
+          moves.push((-j - 1) * 8);
+          if (tiles[count].color !== tiles[i].color) {
+            rightMove = false;
+          }
+        } else {
+          downMove = false;
+        }
+      }
+    } else if (piece.includes("knight")) {
+      const knightMoves = [-17, -15, -10, -6, 6, 10, 15, 17];
+      let j;
+      let count;
+      for (j in knightMoves) {
+        count = i + knightMoves[j];
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece !== tiles[i].color
+        ) {
+          moves.push(knightMoves[j]);
+        }
       }
     } else if (piece.includes("king")) {
-      moves = [-9, -8, -7, -1, 1, 7, 8, 9];
+      let j;
+      let count;
+      for (j = -9; j < -6; j++) {
+        count = i + j;
+        if (count >= 0 && count <= 63 && tiles[count].piece === "") {
+          moves.push(j);
+        }
+      }
+      for (j = 7; j < 10; j++) {
+        count = i + j;
+        if (count >= 0 && count <= 63 && tiles[count].piece === "") {
+          moves.push(j);
+        }
+      }
+      count = i + 1;
+      if (count >= 0 && count <= 63 && tiles[count].piece === "") {
+        moves.push(1);
+      }
+      count = i - 1;
+      if (count >= 0 && count <= 63 && tiles[count].piece === "") {
+        moves.push(-1);
+      }
     }
     return moves;
   }
