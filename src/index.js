@@ -187,14 +187,13 @@ class Game extends React.Component {
     }
   }
   highlightAvailableMoves(i, tiles) {
-    //let pawnMoves = [8, 16];
     let moves = [];
     moves = this.calculatePieceMoves(i, tiles);
     console.log("moves: ", moves);
     let j;
     for (j = 0; j < moves.length; j++) {
       tiles[i + moves[j]] = {
-        ...this.state.tiles[i + moves[j]],
+        ...tiles[i + moves[j]],
         availableMove: true
       };
     }
@@ -279,7 +278,42 @@ class Game extends React.Component {
         }
       }
     } else if (piece.includes("knight")) {
-      const knightMoves = [-17, -15, -10, -6, 6, 10, 15, 17];
+      let knightMoves = [-17, -15, -10, -6, 6, 10, 15, 17];
+      if (i % 8 === 0) {
+        knightMoves.splice(knightMoves.indexOf(-17), 1);
+        knightMoves.splice(knightMoves.indexOf(-10), 1);
+        knightMoves.splice(knightMoves.indexOf(6), 1);
+        knightMoves.splice(knightMoves.indexOf(15), 1);
+      } else if (i % 8 === 1) {
+        knightMoves.splice(knightMoves.indexOf(-10), 1);
+        knightMoves.splice(knightMoves.indexOf(6), 1);
+      }
+      if (i % 8 === 7) {
+        knightMoves.splice(knightMoves.indexOf(-15), 1);
+        knightMoves.splice(knightMoves.indexOf(-6), 1);
+        knightMoves.splice(knightMoves.indexOf(10), 1);
+        knightMoves.splice(knightMoves.indexOf(17), 1);
+      } else if (i % 8 === 6) {
+        knightMoves.splice(knightMoves.indexOf(-6), 1);
+        knightMoves.splice(knightMoves.indexOf(10), 1);
+      }
+      if (i >= 0 && i <= 14) {
+        knightMoves.splice(knightMoves.indexOf(-17), 1);
+        knightMoves.splice(knightMoves.indexOf(-15), 1);
+        if (i >= 0 && i <= 7) {
+          knightMoves.splice(knightMoves.indexOf(-10), 1);
+          knightMoves.splice(knightMoves.indexOf(-6), 1);
+        }
+      }
+
+      if (i >= 47 && i <= 63) {
+        knightMoves.splice(knightMoves.indexOf(17), 1);
+        knightMoves.splice(knightMoves.indexOf(15), 1);
+        if (i >= 56 && i <= 63) {
+          knightMoves.splice(knightMoves.indexOf(10), 1);
+          knightMoves.splice(knightMoves.indexOf(6), 1);
+        }
+      }
       let j;
       let count;
       for (j in knightMoves) {
@@ -287,9 +321,194 @@ class Game extends React.Component {
         if (
           count <= 63 &&
           count >= 0 &&
-          tiles[count].piece !== tiles[i].color
+          tiles[count].color !== tiles[i].color
         ) {
           moves.push(knightMoves[j]);
+        }
+      }
+    } else if (piece.includes("bishop")) {
+      let j;
+      let count;
+      let upLeftMove = true;
+      let upRightMove = true;
+      let downLeftMove = true;
+      let downRightMove = true;
+      let upMove = true;
+      let downMove = true;
+      let rightMove = true;
+      let leftMove = true;
+      for (j = 0; j < 7; j++) {
+        count = i - 9 * (j + 1);
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece === "" &&
+          upLeftMove
+        ) {
+          moves.push(j - 9 * (j + 1));
+          if (tiles[count].color !== tiles[i].color) {
+            upLeftMove = false;
+          }
+        } else {
+          upLeftMove = false;
+        }
+        count = i - 7 * (j + 1);
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece === "" &&
+          upRightMove
+        ) {
+          moves.push(-7 * (j + 1));
+          if (tiles[count].color !== tiles[i].color) {
+            upRightMove = false;
+          }
+        } else {
+          upRightMove = false;
+        }
+        count = i + 7 * (j + 1);
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece === "" &&
+          downLeftMove
+        ) {
+          moves.push(7 * (j + 1));
+          if (tiles[count].color !== tiles[i].color) {
+            downLeftMove = false;
+          }
+        } else {
+          downLeftMove = false;
+        }
+        count = i + 9 * (j + 1);
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece === "" &&
+          downRightMove
+        ) {
+          moves.push(9 * (j + 1));
+          if (tiles[count].color !== tiles[i].color) {
+            downRightMove = false;
+          }
+        } else {
+          downRightMove = false;
+        }
+        count = i + j + 1;
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece === "" &&
+          rightMove
+        ) {
+          moves.push(j + 1);
+          if (tiles[count].color !== tiles[i].color) {
+            rightMove = false;
+          }
+        } else {
+          rightMove = false;
+        }
+        count = i - j - 1;
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece === "" &&
+          leftMove
+        ) {
+          moves.push(-j - 1);
+          if (tiles[count].color !== tiles[i].color) {
+            rightMove = false;
+          }
+        } else {
+          leftMove = false;
+        }
+        count = i + (j + 1) * 8;
+        if (count <= 63 && count >= 0 && tiles[count].piece === "" && upMove) {
+          moves.push((j + 1) * 8);
+          if (tiles[count].color !== tiles[i].color) {
+            rightMove = false;
+          }
+        } else {
+          upMove = false;
+        }
+        count = i + (-j - 1) * 8;
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece === "" &&
+          downMove
+        ) {
+          moves.push((-j - 1) * 8);
+          if (tiles[count].color !== tiles[i].color) {
+            rightMove = false;
+          }
+        } else {
+          downMove = false;
+        }
+      }
+    } else if (piece.includes("queen")) {
+      let j;
+      let count;
+      let upLeftMove = true;
+      let upRightMove = true;
+      let downLeftMove = true;
+      let downRightMove = true;
+      for (j = 0; j < 7; j++) {
+        count = i - 9 * (j + 1);
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece === "" &&
+          upLeftMove
+        ) {
+          moves.push(j - 9 * (j + 1));
+          if (tiles[count].color !== tiles[i].color) {
+            upLeftMove = false;
+          }
+        } else {
+          upLeftMove = false;
+        }
+        count = i - 7 * (j + 1);
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece === "" &&
+          upRightMove
+        ) {
+          moves.push(-7 * (j + 1));
+          if (tiles[count].color !== tiles[i].color) {
+            upRightMove = false;
+          }
+        } else {
+          upRightMove = false;
+        }
+        count = i + 7 * (j + 1);
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece === "" &&
+          downLeftMove
+        ) {
+          moves.push(7 * (j + 1));
+          if (tiles[count].color !== tiles[i].color) {
+            downLeftMove = false;
+          }
+        } else {
+          downLeftMove = false;
+        }
+        count = i + 9 * (j + 1);
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].piece === "" &&
+          downRightMove
+        ) {
+          moves.push(9 * (j + 1));
+          if (tiles[count].color !== tiles[i].color) {
+            downRightMove = false;
+          }
+        } else {
+          downRightMove = false;
         }
       }
     } else if (piece.includes("king")) {
