@@ -160,7 +160,6 @@ class Game extends React.Component {
     let tiles = this.state.tiles.slice();
     let state = this.state;
     let j;
-
     if (tiles[i].availableMove) {
       tiles[i] = state.prevClickedTile;
       tiles[state.prevClickedTileNr] = {
@@ -168,6 +167,11 @@ class Game extends React.Component {
         color: "",
         piece: ""
       };
+      if (state.turn === "white") {
+        state.turn = "black";
+      } else {
+        state.turn = "white";
+      }
     }
     for (j = 0; j < tiles.length; j++) {
       tiles[j] = {
@@ -227,10 +231,25 @@ class Game extends React.Component {
       } else {
         startPosRook = [8, 9, 10, 11, 12, 13, 14, 15];
       }
-      if (startPosRook.includes(i)) {
-        moves = [8 * modifier, 16 * modifier];
-      } else {
-        moves = [8 * modifier];
+      if (tiles[i + 8 * modifier].piece === "") {
+        moves.push(8 * modifier);
+        if (startPosRook.includes(i)) {
+          if (tiles[i + 16 * modifier].piece === "") {
+            moves.push(16 * modifier);
+          }
+        }
+      }
+      if (
+        tiles[i + 7 * modifier].piece !== "" &&
+        tiles[i + 7 * modifier].color !== tiles[i].color
+      ) {
+        moves.push(7 * modifier);
+      }
+      if (
+        tiles[i + 9 * modifier].piece !== "" &&
+        tiles[i + 9 * modifier].color !== tiles[i].color
+      ) {
+        moves.push(9 * modifier);
       }
     } else if (piece.includes("rook")) {
       let j;
