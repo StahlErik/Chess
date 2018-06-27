@@ -160,6 +160,7 @@ class Game extends React.Component {
     let tiles = this.state.tiles.slice();
     let state = this.state;
     let j;
+
     if (tiles[i].availableMove) {
       tiles[i] = state.prevClickedTile;
       tiles[state.prevClickedTileNr] = {
@@ -172,22 +173,29 @@ class Game extends React.Component {
       } else {
         state.turn = "white";
       }
-    }
-    for (j = 0; j < tiles.length; j++) {
-      tiles[j] = {
-        ...tiles[j],
-        clicked: false,
-        availableMove: false
-      };
-    }
+      for (j = 0; j < tiles.length; j++) {
+        tiles[j] = {
+          ...tiles[j],
+          clicked: false,
+          availableMove: false
+        };
+      }
+    } else {
+      for (j = 0; j < tiles.length; j++) {
+        tiles[j] = {
+          ...tiles[j],
+          clicked: false,
+          availableMove: false
+        };
+      }
 
-    tiles[i] = {
-      ...tiles[i],
-      clicked: true
-    };
-    if (this.checkPlayerOnTile(i)) {
-      //console.log("match");
-      tiles = this.highlightAvailableMoves(i, tiles);
+      tiles[i] = {
+        ...tiles[i],
+        clicked: true
+      };
+      if (this.checkPlayerOnTile(i)) {
+        tiles = this.highlightAvailableMoves(i, tiles);
+      }
     }
     this.setState({
       ...this.state,
@@ -243,13 +251,23 @@ class Game extends React.Component {
         tiles[i + 7 * modifier].piece !== "" &&
         tiles[i + 7 * modifier].color !== tiles[i].color
       ) {
-        moves.push(7 * modifier);
+        if (
+          (modifier === -1 && i % 8 !== 7) ||
+          (modifier === 1 && i % 8 !== 0)
+        ) {
+          moves.push(7 * modifier);
+        }
       }
       if (
         tiles[i + 9 * modifier].piece !== "" &&
         tiles[i + 9 * modifier].color !== tiles[i].color
       ) {
-        moves.push(9 * modifier);
+        if (
+          (modifier === -1 && i % 8 !== 0) ||
+          (modifier === 1 && i % 8 !== 7)
+        ) {
+          moves.push(9 * modifier);
+        }
       }
     } else if (piece.includes("rook")) {
       let j;
@@ -309,7 +327,7 @@ class Game extends React.Component {
           if (
             (tiles[count].piece !== "" &&
               tiles[count].color !== tiles[i].color) ||
-            count < 8
+            count > 55
           ) {
             downMove = false;
           }
@@ -328,7 +346,7 @@ class Game extends React.Component {
           if (
             (tiles[count].piece !== "" &&
               tiles[count].color !== tiles[i].color) ||
-            count > 55
+            count < 8
           ) {
             upMove = false;
           }
@@ -356,21 +374,37 @@ class Game extends React.Component {
         knightMoves.splice(knightMoves.indexOf(-6), 1);
         knightMoves.splice(knightMoves.indexOf(10), 1);
       }
-      if (i >= 0 && i <= 14) {
-        knightMoves.splice(knightMoves.indexOf(-17), 1);
-        knightMoves.splice(knightMoves.indexOf(-15), 1);
+      if (i >= 0 && i <= 15) {
+        if (knightMoves.includes(-17)) {
+          knightMoves.splice(knightMoves.indexOf(-17), 1);
+        }
+        if (knightMoves.includes(-15)) {
+          knightMoves.splice(knightMoves.indexOf(-15), 1);
+        }
         if (i >= 0 && i <= 7) {
-          knightMoves.splice(knightMoves.indexOf(-10), 1);
-          knightMoves.splice(knightMoves.indexOf(-6), 1);
+          if (knightMoves.includes(-10)) {
+            knightMoves.splice(knightMoves.indexOf(-10), 1);
+          }
+          if (knightMoves.includes(-6)) {
+            knightMoves.splice(knightMoves.indexOf(-6), 1);
+          }
         }
       }
 
-      if (i >= 47 && i <= 63) {
-        knightMoves.splice(knightMoves.indexOf(17), 1);
-        knightMoves.splice(knightMoves.indexOf(15), 1);
+      if (i >= 48 && i <= 63) {
+        if (knightMoves.includes(17)) {
+          knightMoves.splice(knightMoves.indexOf(17), 1);
+        }
+        if (knightMoves.includes(15)) {
+          knightMoves.splice(knightMoves.indexOf(15), 1);
+        }
         if (i >= 56 && i <= 63) {
-          knightMoves.splice(knightMoves.indexOf(10), 1);
-          knightMoves.splice(knightMoves.indexOf(6), 1);
+          if (knightMoves.includes(10)) {
+            knightMoves.splice(knightMoves.indexOf(10), 1);
+          }
+          if (knightMoves.includes(6)) {
+            knightMoves.splice(knightMoves.indexOf(6), 1);
+          }
         }
       }
       let j;
@@ -397,11 +431,18 @@ class Game extends React.Component {
         if (
           count <= 63 &&
           count >= 0 &&
-          tiles[count].piece === "" &&
-          upLeftMove
+          tiles[count].color !== tiles[i].color &&
+          upLeftMove &&
+          i % 8 !== 0 &&
+          i > 7
         ) {
-          moves.push(j - 9 * (j + 1));
-          if (tiles[count].color !== tiles[i].color) {
+          moves.push(-9 * (j + 1));
+          if (
+            (tiles[count].piece !== "" &&
+              tiles[count].color !== tiles[i].color) ||
+            count % 8 === 0 ||
+            count < 8
+          ) {
             upLeftMove = false;
           }
         } else {
@@ -411,11 +452,18 @@ class Game extends React.Component {
         if (
           count <= 63 &&
           count >= 0 &&
-          tiles[count].piece === "" &&
-          upRightMove
+          tiles[count].color !== tiles[i].color &&
+          upRightMove &&
+          i % 8 !== 7 &&
+          i > 7
         ) {
           moves.push(-7 * (j + 1));
-          if (tiles[count].color !== tiles[i].color) {
+          if (
+            (tiles[count].piece !== "" &&
+              tiles[count].color !== tiles[i].color) ||
+            count % 8 === 7 ||
+            count < 8
+          ) {
             upRightMove = false;
           }
         } else {
@@ -425,11 +473,18 @@ class Game extends React.Component {
         if (
           count <= 63 &&
           count >= 0 &&
-          tiles[count].piece === "" &&
-          downLeftMove
+          tiles[count].color !== tiles[i].color &&
+          downLeftMove &&
+          i < 56 &&
+          i % 8 !== 0
         ) {
           moves.push(7 * (j + 1));
-          if (tiles[count].color !== tiles[i].color) {
+          if (
+            (tiles[count].piece !== "" &&
+              tiles[count].color !== tiles[i].color) ||
+            count > 55 ||
+            count % 8 === 0
+          ) {
             downLeftMove = false;
           }
         } else {
@@ -439,11 +494,18 @@ class Game extends React.Component {
         if (
           count <= 63 &&
           count >= 0 &&
-          tiles[count].piece === "" &&
-          downRightMove
+          tiles[count].color !== tiles[i].color &&
+          downRightMove &&
+          i < 56 &&
+          i % 8 !== 7
         ) {
           moves.push(9 * (j + 1));
-          if (tiles[count].color !== tiles[i].color) {
+          if (
+            (tiles[count].piece !== "" &&
+              tiles[count].color !== tiles[i].color) ||
+            count > 55 ||
+            count % 8 === 7
+          ) {
             downRightMove = false;
           }
         } else {
@@ -466,11 +528,18 @@ class Game extends React.Component {
         if (
           count <= 63 &&
           count >= 0 &&
-          tiles[count].piece === "" &&
-          upLeftMove
+          tiles[count].color !== tiles[i].color &&
+          upLeftMove &&
+          i % 8 !== 0 &&
+          i > 7
         ) {
-          moves.push(j - 9 * (j + 1));
-          if (tiles[count].color !== tiles[i].color) {
+          moves.push(-9 * (j + 1));
+          if (
+            (tiles[count].piece !== "" &&
+              tiles[count].color !== tiles[i].color) ||
+            count % 8 === 0 ||
+            count < 8
+          ) {
             upLeftMove = false;
           }
         } else {
@@ -480,11 +549,18 @@ class Game extends React.Component {
         if (
           count <= 63 &&
           count >= 0 &&
-          tiles[count].piece === "" &&
-          upRightMove
+          tiles[count].color !== tiles[i].color &&
+          upRightMove &&
+          i % 8 !== 7 &&
+          i > 7
         ) {
           moves.push(-7 * (j + 1));
-          if (tiles[count].color !== tiles[i].color) {
+          if (
+            (tiles[count].piece !== "" &&
+              tiles[count].color !== tiles[i].color) ||
+            count % 8 === 7 ||
+            count < 8
+          ) {
             upRightMove = false;
           }
         } else {
@@ -494,11 +570,18 @@ class Game extends React.Component {
         if (
           count <= 63 &&
           count >= 0 &&
-          tiles[count].piece === "" &&
-          downLeftMove
+          tiles[count].color !== tiles[i].color &&
+          downLeftMove &&
+          i < 56 &&
+          i % 8 !== 0
         ) {
           moves.push(7 * (j + 1));
-          if (tiles[count].color !== tiles[i].color) {
+          if (
+            (tiles[count].piece !== "" &&
+              tiles[count].color !== tiles[i].color) ||
+            count > 55 ||
+            count % 8 === 0
+          ) {
             downLeftMove = false;
           }
         } else {
@@ -508,11 +591,18 @@ class Game extends React.Component {
         if (
           count <= 63 &&
           count >= 0 &&
-          tiles[count].piece === "" &&
-          downRightMove
+          tiles[count].color !== tiles[i].color &&
+          downRightMove &&
+          i < 56 &&
+          i % 8 !== 7
         ) {
           moves.push(9 * (j + 1));
-          if (tiles[count].color !== tiles[i].color) {
+          if (
+            (tiles[count].piece !== "" &&
+              tiles[count].color !== tiles[i].color) ||
+            count > 55 ||
+            count % 8 === 7
+          ) {
             downRightMove = false;
           }
         } else {
@@ -522,11 +612,16 @@ class Game extends React.Component {
         if (
           count <= 63 &&
           count >= 0 &&
-          tiles[count].piece === "" &&
-          rightMove
+          tiles[count].color !== tiles[i].color &&
+          rightMove &&
+          i % 8 !== 7
         ) {
           moves.push(j + 1);
-          if (tiles[count].color !== tiles[i].color) {
+          if (
+            (tiles[count].piece !== "" &&
+              tiles[count].color !== tiles[i].color) ||
+            count % 8 === 7
+          ) {
             rightMove = false;
           }
         } else {
@@ -536,38 +631,58 @@ class Game extends React.Component {
         if (
           count <= 63 &&
           count >= 0 &&
-          tiles[count].piece === "" &&
-          leftMove
+          tiles[count].color !== tiles[i].color &&
+          leftMove &&
+          i % 8 !== 0
         ) {
           moves.push(-j - 1);
-          if (tiles[count].color !== tiles[i].color) {
-            rightMove = false;
+          if (
+            (tiles[count].piece !== "" &&
+              tiles[count].color !== tiles[i].color) ||
+            count % 8 === 0
+          ) {
+            leftMove = false;
           }
         } else {
           leftMove = false;
         }
         count = i + (j + 1) * 8;
-        if (count <= 63 && count >= 0 && tiles[count].piece === "" && upMove) {
+        if (
+          count <= 63 &&
+          count >= 0 &&
+          tiles[count].color !== tiles[i].color &&
+          downMove &&
+          i < 56
+        ) {
           moves.push((j + 1) * 8);
-          if (tiles[count].color !== tiles[i].color) {
-            rightMove = false;
+          if (
+            (tiles[count].piece !== "" &&
+              tiles[count].color !== tiles[i].color) ||
+            count > 55
+          ) {
+            downMove = false;
           }
         } else {
-          upMove = false;
+          downMove = false;
         }
         count = i + (-j - 1) * 8;
         if (
           count <= 63 &&
           count >= 0 &&
-          tiles[count].piece === "" &&
-          downMove
+          tiles[count].color !== tiles[i].color &&
+          upMove &&
+          i > 7
         ) {
           moves.push((-j - 1) * 8);
-          if (tiles[count].color !== tiles[i].color) {
-            rightMove = false;
+          if (
+            (tiles[count].piece !== "" &&
+              tiles[count].color !== tiles[i].color) ||
+            count < 8
+          ) {
+            upMove = false;
           }
         } else {
-          downMove = false;
+          upMove = false;
         }
       }
     } else if (piece.includes("king")) {
