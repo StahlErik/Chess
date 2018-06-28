@@ -66,7 +66,7 @@ class Row extends React.Component {
 
 class Game extends React.Component {
   state = {
-    counter: 0,
+    turnCounter: 0,
     turn: "white",
     tiles: Array(64).fill({
       piece: "",
@@ -168,6 +168,7 @@ class Game extends React.Component {
         color: "",
         piece: ""
       };
+      state.turnCounter = state.turnCounter + 1;
       if (state.turn === "white") {
         state.turn = "black";
       } else {
@@ -199,7 +200,7 @@ class Game extends React.Component {
     }
     this.setState({
       ...this.state,
-      counter: this.state.counter + 1,
+      turnCounter: state.turnCounter,
       tiles: tiles,
       prevClickedTile: tiles[i],
       prevClickedTileNr: i
@@ -688,27 +689,23 @@ class Game extends React.Component {
     } else if (piece.includes("king")) {
       let j;
       let count;
-      for (j = -9; j < -6; j++) {
-        count = i + j;
-        if (count >= 0 && count <= 63 && tiles[count].piece === "") {
-          moves.push(j);
+      let kingMoves = [-9, -8, -7, -1, 1, 7, 8, 9];
+      for (j in kingMoves) {
+        count = i + kingMoves[j];
+        console.log("count: ", count);
+        console.log("kingmoves: ", kingMoves[j]);
+        if (
+          count >= 0 &&
+          count <= 63 &&
+          tiles[count].color !== tiles[i].color
+        ) {
+          //console.log("first if");
+          moves.push(kingMoves[j]);
+          //kingMoves.splice(kingMoves.indexOf(kingMoves[j]), 1);
         }
-      }
-      for (j = 7; j < 10; j++) {
-        count = i + j;
-        if (count >= 0 && count <= 63 && tiles[count].piece === "") {
-          moves.push(j);
-        }
-      }
-      count = i + 1;
-      if (count >= 0 && count <= 63 && tiles[count].piece === "") {
-        moves.push(1);
-      }
-      count = i - 1;
-      if (count >= 0 && count <= 63 && tiles[count].piece === "") {
-        moves.push(-1);
       }
     }
+
     return moves;
   }
 
